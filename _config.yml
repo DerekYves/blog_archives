@@ -7,13 +7,13 @@
 
 # Site settings
 title: R From Stata
-email: darves@gmail.com
+email: darves[at]gmail.com
 description: > # this means to ignore newlines until "baseurl:"
     The goal of this blog is to help people who are making the transition from STATA to R (or, at least, trying to supplement their STATA skills with R).
 baseurl: "/blog" # the subpath of your site, e.g. /blog
 url: "http://derekyves.github.io/blog/" # the base hostname & protocol for your site
 twitter_username: dyd78
 github_username:  DerekYves
-
+linkedin_username: derek-darves-681a93a7
 # Build settings
 markdown: kramdown
