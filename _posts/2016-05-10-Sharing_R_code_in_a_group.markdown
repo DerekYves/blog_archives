@@ -17,72 +17,66 @@ An added advantage the approach I’ve developed: if I want to move ALL of my ma
 
 In short, my process is basically this:
 
-<ol start="1"><li> A specific (hopefully source controlled) file is sourced at the top of each analysis script. At the point of sourcing some parameters are declared which do the correct thing depending on whether the host is Linux, Mac, or Windows. This is done in several steps. In the analysis script I include a few lines of code that allow all users to run the same exact file with the correct directory parameters loaded. Here’s an example:
-</li></ol>
-{% highlight r %}  
-## Load host-dependent directory environment
-winos <- ifelse(grepl("windows", Sys.info()['sysname'], ignore.case=T), 1, 0)
-if(winos==1) source("C:/data/projects/scripts/R/functions/file_dir_params.R")
-if(winos==0) source("~/projects/scripts/R/functions/file_dir_params.R")
-rm(winos, host)
-{% endhighlight %}
+1. A specific (hopefully source controlled) file is sourced at the top of each analysis script. At the point of sourcing some parameters are declared which do the correct thing depending on whether the host is Linux, Mac, or Windows. This is done in several steps. In the analysis script I include a few lines of code that allow all users to run the same exact file with the correct directory parameters loaded. Here’s an example:
 
-<ol start="2"><li> The next step is to build your version of the file/directory parameter file that was sourced in step 1 by a script (in this post I'll call this file “file_dir_params.R”). 
-</li></ol>
-    {% highlight r %}
+        ```r 
+        ## Load host-dependent directory environment
+        winos <- ifelse(grepl("windows", Sys.info()['sysname'], ignore.case=T), 1, 0)
+        if(winos==1) source("C:/data/projects/scripts/R/functions/file_dir_params.R")
+        if(winos==0) source("~/projects/scripts/R/functions/file_dir_params.R")
+        rm(winos, host)
+        ```
 
-#--begin file_dir_params.R script--#
+2. The next step is to build your version of the file/directory parameter file that was sourced in step 1 by a script (in this post I'll call this file “file_dir_params.R”). 
 
-# Make a new environment:
-fdirs <- new.env()
+        ```r
+        #--begin file_dir_params.R script--#
+        
+        # Make a new environment:
+        fdirs <- new.env()
+        ```
 
-    {% endhighlight %}
+3. Run add this function to "file_dir_params.R", which is used to save a simple string indicating the host's OS type:
 
-<ol start="3"><li> Run add this function to "file_dir_params.R", which is used to save a simple string indicating the host's OS type:
-</li></ol>
+        ```r
+        # Function to standardize host OS name
+        get_os <- function(){
+        	sysinf <- Sys.info()
+        	if (!is.null(sysinf)){
+        		os <- sysinf['sysname']
+        		if (os == 'Darwin')
+        			os <- "osx"
+        	} else {
+        		os <- .Platform$OS.type
+        		if (grepl("^darwin", R.version$os))
+        			os <- "osx"
+        		if (grepl("linux-gnu", R.version$os))
+        			os <- "linux"
+        	}
+        	tolower(os)
+        }
+        fdirs$computeros <- get_os()
+        ```
 
-{% highlight r %}
-# Function to standardize host OS name
-get_os <- function(){
-	sysinf <- Sys.info()
-	if (!is.null(sysinf)){
-		os <- sysinf['sysname']
-		if (os == 'Darwin')
-			os <- "osx"
-	} else {
-		os <- .Platform$OS.type
-		if (grepl("^darwin", R.version$os))
-			os <- "osx"
-		if (grepl("linux-gnu", R.version$os))
-			os <- "linux"
-	}
-	tolower(os)
-}
-fdirs$computeros <- get_os()
+4. With our new environment loaded and knowledge of the computer's OS, we're ready to build platform agnostic variables that point to key shared directories (directories that are probably saved through pulling a remote GIT repository onto the local computer):
 
-{% endhighlight %}
 
-<ol start="4"><li> With our new environment loaded and knowledge of the computer's OS, we're ready to build platform agnostic variables that point to key shared directories (directories that are probably saved through pulling a remote GIT repository onto the local computer):
-</li></ol>
+        ```r
+        ## Declare the root project and data directory:
+        
+        show  <- 1
+        build <- 1
+        
+        if(grepl("windows", fdirs$computeros)==F){
+        	fdirs$prjdir <- "~/projects/"
+        	fdirs$prjdta <- "/your_data/"
+          }else{
+        	fdirs$prjdir <- "C:/projects/"
+        	fdirs$prjdta <- "D:/your_data/"
+        }
+        ```
 
-{% highlight r %}
-
-## Declare the root project and data directory:
-
-show  <- 1
-build <- 1
-
-if(grepl("windows", fdirs$computeros)==F){
-	fdirs$prjdir <- "~/projects/"
-	fdirs$prjdta <- "/your_data/"
-  }else{
-	fdirs$prjdir <- "C:/projects/"
-	fdirs$prjdta <- "D:/your_data/"
-}
-
-{% endhighlight %}
-
-<ol start="5"><li> Depending on your setup you may have multiple project or data root folders you want to declare. 
+5. Depending on your setup you may have multiple project or data root folders you want to declare. 
 To keep my life simple on my development machine, I try and make all data a sub-directory of prjdta 
 and all scripts a subdirectory of prjdir. Once you have these set using the platform agnostic pattern
 outlined in step 4, you're ready to build out all your subdirectories. Because every sub-directory
@@ -91,54 +85,49 @@ is a child of the root directories, make sure to always build new variables usin
 One added very useful bonus: if I move, say, my main data folder, I don’t have to rewrite 100 variable names 
 in dozens of scripts. I just change the root data folder (in this example, “fdirs$prjdta”) once
 and everything else takes care of itself. Here’s some examples:
-</li></ol>
 
-{% highlight r %}
 
-# Add some child objects to the fdirs environment:
-fdirs$dqrptsrc   <- paste0(fdirs$prjdta, "data_quality/source/")
-if(show==1) cat("\ndqrptsrc =", fdirs$dqrptsrc)
-if(make==1) system(paste0("mkdir -p ", fdirs$dqrptsrc))
+        ```r
+        # Add some child objects to the fdirs environment:
+        fdirs$dqrptsrc   <- paste0(fdirs$prjdta, "data_quality/source/")
+        if(show==1) cat("\ndqrptsrc =", fdirs$dqrptsrc)
+        if(make==1) system(paste0("mkdir -p ", fdirs$dqrptsrc))
+        
+        # Define some colors for (say) GGPlot using your organization's color codes:
+        fdirs$com_ppt_orange <- "#FF6122"
+        fdirs$com_cr_blue    <- "#30812E"
+        fdirs$com_cr_red     <- "#D0212E"
+        fdirs$com_cr_green   <- "#8EB126"
+        ```
 
-# Define some colors for (say) GGPlot using your organization's color codes:
-fdirs$com_ppt_orange <- "#FF6122"
-fdirs$com_cr_blue    <- "#30812E"
-fdirs$com_cr_red     <- "#D0212E"
-fdirs$com_cr_green   <- "#8EB126"
-
-{% endhighlight %}
-
-<ol start="6"><li> Notice how, in the lines above, how I reference the "show" and "make" flags we declared at the top of our "file_dir_params.R" script.
+6. Notice how, in the lines above, how I reference the "show" and "make" flags we declared at the top of our "file_dir_params.R" script.
 What these do, respectively, is print the file location of the variable in STDOUT and build the folder if it does not exist. These flags can be
 helpful but are not strictly necessary.
-</li></ol>
 
-<ol start="7"><li> Our last step is to attach the "fdirs" environment (or safely reload it if it's already attached):
-</li></ol>
+7. Our last step is to attach the "fdirs" environment (or safely reload it if it's already attached):
 
-{% highlight r %}
-# Attach the new environment (and safely reload if already attached):
-while("fdirs" %in% search())
-detach("fdirs")
-attach(fdirs)
-{% endhighlight %}
+        ```r
+        # Attach the new environment (and safely reload if already attached):
+        while("fdirs" %in% search())
+        detach("fdirs")
+        attach(fdirs)
+        ```
 
 <br>
+
 **Final Thoughts**
 
 Attaching the environment as we did in step 7 is a great time saver because your can omit the "fdirs$" prefix in your scripts. For example, to load a file in my data
 folder I now just write:
 
-{% highlight r %}
+```r
 x <- readRDS(paste0(dqrptsrc, "somefile.Rds"))
-{% endhighlight %}
-
+```
 As opposed to:
 
-{% highlight r %}
+```r
 x <- readRDS(paste0(fdirs$dqrptsrc, "somefile.Rds"))
-{% endhighlight %}
-
+```
 But as with everything, there is a draw back: you'll want to make sure the names of your variables in fdirs don't overlap with functions
 or other items you declare in a script. For this reason I use expressions like "prjdta" rather than "data", and I avoid overly concise
 constructions that are used in a lot of example code, e.g. "x", "y", or "z".
