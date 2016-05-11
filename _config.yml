@@ -17,3 +17,4 @@ github_username:  DerekYves
 linkedin_username: derek-darves-681a93a7
 # Build settings
 markdown: kramdown
+highlighter: pygments
