@@ -19,14 +19,17 @@ In short, my process is basically this:
 
 1. A specific, source controlled file is sourced at the top of each analysis script. At the point of sourcing some parameters are declared which do the correct thing depending on whether the host is Linux, Mac, or Windows. This is done in several steps. In the analysis script I include a few lines of code that allow all users to run the same exact file with the correct directory parameters loaded. Here’s an example:
 
+```
 ### Load host-dependent directory environment
 winos <- ifelse(grepl("windows", Sys.info()['sysname'], ignore.case=T), 1, 0)
 if(winos==1) source("C:/data/projects/scripts/R/functions/file_dir_params.R")
 if(winos==0) source("~/projects/scripts/R/functions/file_dir_params.R")
 rm(winos, host)
 ###
+```
 Now, inside the sourced file (“file_dir_params.R”) I have a series of commands that allow the host to gracefully adapt to the exact same script regardless of the OS it’s running. Here’s an example:
 
+```
 # Function to standardize host OS name
 get_os <- function(){
 	sysinf <- Sys.info()
@@ -44,15 +47,21 @@ get_os <- function(){
 	tolower(os)
 }
 fdirs$computeros <- get_os()
+```
+
 Since most people in my group use Mac/Linux, I then declare the key directories but overwrite this variable if the computer is Windows, e.g.:
 
+```
 ## This is an example of a root project directory:
 fdirs$prjdir <- "~/projects/"
 
 # Now, change this variable if the computer runs Windows:
 if(grepl("windows", fdirs$computeros) fdirs$prjdir <- "C:/projects/"
+```
+
 2. This sourced file also creates a new environment (I call mine “fdirs”) which, after creating multiple variables to describe things like directory locations and corporate color codes, is attached at the end of the script. This makes all the variables accessible within all of my scripts but doesn’t clutter the global environment panel of, say, RStudio. Here’s an example:
 
+```
 # Make a new environment:
 fdirs <- new.env()
 
@@ -71,15 +80,20 @@ fdirs$com_cr_green <- "#8EB126"
 while("fdirs" %in% search())
 detach("fdirs")
 attach(fdirs)
+```
+
 3. All directory locations are created in a compound fashion. Therefore, if I move, say, my main data folder, I don’t have to rewrite 100 variable names in dozens of difference scripts. I just change the root folder (in this example, “fdirs$stat_data”). Here’s an example:
 
-### Define the root data directory
+```
+## Define the root data directory
 fdirs$stat_data <- "/dataroot/"
 
 # Now build data subdirectories "on top" off fdirs$stat_data
 fdirs$dqrptsrc   <- paste0(fdirs$stat_data, "dq_reports/source/")
 if(test==1) cat("\ndqrptsrc =", fdirs$dqrptsrc)
 if(make==1) system(paste0("mkdir -p ", fdirs$dqrptsrc))
+```
 
 Notice how, in the the two lines above I also created flags to optionally build the data folder structure and pipe the output to STDOUT to alert the user to the local directory location implied by a variable.
 
+Hope this helps someone, and feel free to drop me an email if you have any further questions!
