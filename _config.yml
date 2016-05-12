@@ -18,5 +18,3 @@ linkedin_username: derek-darves-681a93a7
 # Build settings
 markdown: kramdown
 highlighter: rouge
-kramdown:
-  input: GFM
