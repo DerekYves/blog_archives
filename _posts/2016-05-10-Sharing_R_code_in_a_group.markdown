@@ -17,7 +17,7 @@ An added advantage the approach I’ve developed: if I want to move ALL of my ma
 
 In short, my process is basically this:
 
-1. A specific (hopefully source controlled) file is sourced at the top of each analysis script. At the point of sourcing some parameters are declared which do the correct thing depending on whether the host is Linux, Mac, or Windows. This is done in several steps. In the analysis script I include a few lines of code that allow all users to run the same exact file with the correct directory parameters loaded. Here’s an example:
+1. The same (hopefully source controlled) file is sourced at the top of each *analysis* script. At the point of sourcing some parameters are declared which do the correct thing depending on whether the host is Linux, Mac, or Windows. Here’s an example:
         
         ## Load host-dependent directory environment
         winos <- ifelse(grepl("windows", Sys.info()['sysname'], ignore.case=T), 1, 0)
@@ -33,7 +33,7 @@ In short, my process is basically this:
         # Make a new environment:
         fdirs <- new.env()
         
-3. Run add this function to "file_dir_params.R", which is used to save a simple string indicating the host's OS type:
+3. Now add this function to the "file_dir_params.R", which is used to save a simple string indicating the host's OS type:
 
         # Function to standardize host OS name
         get_os <- function(){
@@ -54,7 +54,7 @@ In short, my process is basically this:
         fdirs$computeros <- get_os()
         
 
-4. With our new environment loaded and knowledge of the computer's OS, we're ready to build platform agnostic variables that point to key shared directories (directories that are probably saved through pulling a remote GIT repository onto the local computer):
+4. With our new environment loaded and knowledge of the computer's OS, we're ready to build platform agnostic variables that point to the most important shared directories in your group:
         
         ## Declare the root project and data directory:
         
@@ -69,19 +69,21 @@ In short, my process is basically this:
         	fdirs$prjdta <- "D:/your_data/"
         }
         
-5. Depending on your setup you may have multiple project or data root folders you want to declare. 
-To keep my life simple on my development machine, I try and make all data a sub-directory of prjdta 
-and all scripts a subdirectory of prjdir. Once you have these set using the platform agnostic pattern
+5. Depending on your setup you may have multiple project or data folders you want to declare. 
+To keep my life simple on my development machine, I try and make all data a sub-directory of "prjdta" 
+and all scripts a subdirectory of "prjdir". Once you have these set using the platform agnostic pattern
 outlined in step 4, you're ready to build out all your subdirectories. Because every sub-directory
-is a child of the root directories, make sure to always build new variables using the either 
-(in my example) either prjdta or prjdir. This is the key to making code work across different platforms.
-One added very useful bonus: if I move, say, my main data folder, I don’t have to rewrite 100 variable names 
-in dozens of scripts. I just change the root data folder (in this example, “fdirs$prjdta”) once
-and everything else takes care of itself. Here’s some examples:
+is a child of the your root directories defined in step 4, make sure to always build new directory variables using 
+one of the root directories (in my example, "prjdta" or "prjdir"). This is the key to making 
+the code work across different platforms. It's what allows the variable representing a folder to 
+seamlessly shift between "C:/projects/some_folder" and "~/projects/some-folder" depending on the host which calls the script.
+One added and very useful bonus: if I move, say, my main data folder, I don’t have to rewrite 100 variable names 
+in dozens of scripts. I just change the root data folder (in this example, “fdirs$prjdta”) *once* in *one* file
+and everything else takes care of itself in my batch environment. Here’s some examples:
         
         # Add some child objects to the fdirs environment:
         fdirs$dqrptsrc   <- paste0(fdirs$prjdta, "data_quality/source/")
-        if(show==1) cat("\ndqrptsrc =", fdirs$dqrptsrc)
+        if(show==1 & interactive()) cat("\ndqrptsrc =", fdirs$dqrptsrc)
         if(make==1) system(paste0("mkdir -p ", fdirs$dqrptsrc))
         
         # Define some colors for (say) GGPlot using your organization's color codes:
@@ -96,8 +98,7 @@ What these do, respectively, is print the file location of the variable to stand
 useful but is not strictly necessary.
 
 7. Our last step is to attach the "fdirs" environment (or safely reload it if it's already attached):
-
-        
+  
         # Attach the new environment (and safely reload if already attached):
         while("fdirs" %in% search())
         detach("fdirs")
@@ -108,7 +109,7 @@ useful but is not strictly necessary.
 
 **Final Thoughts**
 
-Attaching the environment as we did in step 7 is a great time saver because your can omit the "fdirs$" prefix in your scripts. For example, to load a file in my data
+Attaching the environment as we did in step 7 is a great time saver because your can omit the "fdirs$" prefix when you reference variables in your scripts. For example, to load a file in a data
 folder I now just write:
 
         x <- readRDS(paste0(dqrptsrc, "somefile.Rds"))
@@ -117,7 +118,7 @@ As opposed to:
 
         x <- readRDS(paste0(fdirs$dqrptsrc, "somefile.Rds"))
 
-But as with everything, there is a draw back: you'll want to make sure the names of your variables in fdirs don't overlap with functions
+But, as with everything, there's a draw back: you'll want to make sure the names of your variables don't overlap with functions
 or other items you declare in a script. For this reason I use expressions like "prjdta" rather than "data", and I avoid overly concise
 constructions that are used in a lot of example code, e.g. "x", "y", or "z".
 
