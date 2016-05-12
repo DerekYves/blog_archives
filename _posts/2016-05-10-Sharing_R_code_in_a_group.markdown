@@ -73,7 +73,7 @@ In short, my process is basically this:
 To keep my life simple on my development machine, I try and make all data a sub-directory of "prjdta" 
 and all scripts a subdirectory of "prjdir". Once you have these set using the platform agnostic pattern
 outlined in step 4, you're ready to build out all your subdirectories. Because every sub-directory
-is a child of the your root directories defined in step 4, make sure to always build new directory variables using 
+is a child of the root directories defined in step 4, make sure to always build new directory variables using 
 one of the root directories (in my example, "prjdta" or "prjdir"). This is the key to making 
 the code work across different platforms. It's what allows the variable representing a folder to 
 seamlessly shift between "C:/projects/some_folder" and "~/projects/some-folder" depending on the host which calls the script.
