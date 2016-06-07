@@ -2,6 +2,7 @@
 layout: post
 title:  "Sharing R code in a workgroup of Mac/Windows/Linux users"
 date:   2016-05-10 18:56:05 -0400
+author: "Derek Darves"
 categories: R
 ---
 
