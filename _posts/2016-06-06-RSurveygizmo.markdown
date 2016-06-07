@@ -32,7 +32,7 @@ a_campaign <- pullsg_campaign(surveyid, api)
 
 ## Combine the previous steps in one function, that is, download email campaign data and merge it, 
 ## where possible, with the survey response object (this will only work, of course, when there are 
-##. valid email campaigns associated with a survey project).
+## valid email campaigns associated with a survey project).
 
 a_survey <- pullsg(1234, api, mergecampaign=T)
 ```
