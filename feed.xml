@@ -1,3 +1,5 @@
-<head>
-<meta http-equiv="refresh" content="0; URL='http://derekyves.github.io/atom.xml'" />
-</head>
+<redirect>
+<newLocation>
+http://derekyves.github.io/atom.xml
+</newLocation>
+</redirect>
