@@ -1,10 +1,2 @@
-<IfModule mod_rewrite.c>
-RewriteEngine On
-RewriteBase /_posts
-RewriteRule ^http://derekyves.github.io/blog/ http://derekyves.github.io/ [L,R=301]
-RewriteRule ^index.php$ – [L]
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule . /index.php [L]
-</IfModule>
-# END WordPr
+RedirectPermanent / http://www.new-domain.com/
+
