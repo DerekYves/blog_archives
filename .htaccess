@@ -1,0 +1,5 @@
+<IfModule mod_rewrite.c>
+RewriteEngine On
+RewriteBase /
+RewriteRule ^feed.xml feed://derekyves.github.io/atom.xml [L,R=301]
+</IfModule>
