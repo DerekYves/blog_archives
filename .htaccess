@@ -1,6 +1,6 @@
 <IfModule mod_rewrite.c>
 RewriteEngine On
-RewriteBase /
+RewriteBase /_posts
 RewriteRule ^http://derekyves.github.io/blog/ http://derekyves.github.io/ [L,R=301]
 RewriteRule ^index.php$ – [L]
 RewriteCond %{REQUEST_FILENAME} !-f
